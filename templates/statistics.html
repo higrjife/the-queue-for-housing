@@ -2,97 +2,142 @@
 {% load humanize %}
 {% block content %}
 <div class="container mx-auto p-4 mt-12">
-    <header class="flex justify-between items-center mb-4">
-        <h1 class="text-xl font-bold">Statistics</h1>
-    </header>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div class="bg-blue-500 text-white p-4 rounded-lg flex items-center justify-between">
-            <div>
-                <h2 class="text-2xl font-bold">{{ total_applications|intcomma }}</h2>
-                <p class="text-sm">TOTAL APPLICATIONS</p>
-                <p class="text-xs mt-2">+ {{ last_month_applications|intcomma }} Last month</p>
-            </div>
-            <i class="fas fa-envelope-open-text text-4xl"></i>
+    
+    <h1 class="text-3xl font-bold mb-6">Housing Market Statistics</h1>
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-blue-500 text-white p-6 rounded-lg">
+            <h2 class="text-3xl font-bold">{{ stats.total|intcomma }}</h2>
+            <p class="text-sm mt-1">Total Properties</p>
         </div>
-        <div class="bg-blue-500 text-white p-4 rounded-lg flex items-center justify-between">
-            <div>
-                <h2 class="text-2xl font-bold">{{ total_queue_members|intcomma }}</h2>
-                <p class="text-sm">TOTAL QUEUE MEMBERS</p>
-                <p class="text-xs mt-2">+ {{ last_month_queue|intcomma }} Last month</p>
-            </div>
-            <i class="fas fa-users text-4xl"></i>
+        <div class="bg-green-500 text-white p-6 rounded-lg">
+            <h2 class="text-3xl font-bold">₹{{ stats.avg_price }}L</h2>
+            <p class="text-sm mt-1">Average Price</p>
         </div>
-        <div class="bg-blue-500 text-white p-4 rounded-lg flex items-center justify-between">
-            <div>
-                <h2 class="text-2xl font-bold">{{ total_users|intcomma }}</h2>
-                <p class="text-sm">REGISTERED USERS</p>
-                <p class="text-xs mt-2">+ {{ week_growth|floatformat:2 }}% Last 7 days</p>
-            </div>
-            <i class="fas fa-user-check text-4xl"></i>
+        <div class="bg-purple-500 text-white p-6 rounded-lg">
+            <h2 class="text-3xl font-bold">{{ stats.avg_sqft|floatformat:0 }}</h2>
+            <p class="text-sm mt-1">Average Square Feet</p>
+        </div>
+        <div class="bg-orange-500 text-white p-6 rounded-lg">
+            <h2 class="text-3xl font-bold">₹{{ stats.avg_price_per_sqft|floatformat:0 }}</h2>
+            <p class="text-sm mt-1">Avg Price per Sq Ft</p>
         </div>
     </div>
-    <div class="bg-white p-4 rounded-lg">
-        <h2 class="text-lg font-bold mb-4">APPLICATIONS</h2>
-        <div class="flex justify-between mb-4">
-            <button class="filter-btn bg-blue-500 text-white py-2 px-4 rounded-lg active" onclick="updateTable('month', this)">Last month</button>
-            <button class="filter-btn bg-gray-200 text-gray-700 py-2 px-4 rounded-lg" onclick="updateTable('3months', this)">Last 3 months</button>
-            <button class="filter-btn bg-gray-200 text-gray-700 py-2 px-4 rounded-lg" onclick="updateTable('6months', this)">Last 6 months</button>
+    
+    <!-- SECTION 1: Price Analysis -->
+    <div class="mb-8">
+        <div class="border-l-4 border-blue-500 pl-4 mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Price Analysis</h2>
+            <p class="text-gray-600 text-sm">Distribution and trends of property prices</p>
         </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white">
-                <thead>
-                    <tr>
-                        <th class="py-2 px-4 bg-blue-500 text-white">Date</th>
-                        <th class="py-2 px-4 bg-blue-500 text-white">Total Count</th>
-                        <th class="py-2 px-4 bg-blue-500 text-white">Processed Count</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body"></tbody>
-            </table>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Price Distribution</h3>
+                <img src="data:image/png;base64,{{ plots.price_hist }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Price per Square Foot</h3>
+                <img src="data:image/png;base64,{{ plots.price_per_sqft }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Properties by Price Range</h3>
+                <img src="data:image/png;base64,{{ plots.price_ranges }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Price vs Square Feet</h3>
+                <img src="data:image/png;base64,{{ plots.scatter }}" class="w-full">
+            </div>
         </div>
     </div>
+    
+    <!-- SECTION 2: Location Insights -->
+    <div class="mb-8">
+        <div class="border-l-4 border-green-500 pl-4 mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Location Insights</h2>
+            <p class="text-gray-600 text-sm">Most expensive and popular locations</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Top 15 Locations by Price</h3>
+                <img src="data:image/png;base64,{{ plots.top_locations }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Top Locations by Property Count</h3>
+                <img src="data:image/png;base64,{{ plots.location_counts }}" class="w-full">
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECTION 3: Property Characteristics -->
+    <div class="mb-8">
+        <div class="border-l-4 border-purple-500 pl-4 mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Property Characteristics</h2>
+            <p class="text-gray-600 text-sm">Size, type, and availability analysis</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Property Size Distribution</h3>
+                <img src="data:image/png;base64,{{ plots.size_dist }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Square Feet Distribution</h3>
+                <img src="data:image/png;base64,{{ plots.sqft_hist }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Area Type Distribution</h3>
+                <img src="data:image/png;base64,{{ plots.area_type }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Property Availability</h3>
+                <img src="data:image/png;base64,{{ plots.availability }}" class="w-full">
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECTION 4: Size & Space Analysis -->
+    <div class="mb-8">
+        <div class="border-l-4 border-orange-500 pl-4 mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Size & Space Analysis</h2>
+            <p class="text-gray-600 text-sm">How property size affects price and space</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Average Price by Size</h3>
+                <img src="data:image/png;base64,{{ plots.price_by_size }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Square Feet by Size</h3>
+                <img src="data:image/png;base64,{{ plots.size_sqft }}" class="w-full">
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECTION 5: Amenities Impact -->
+    <div class="mb-8">
+        <div class="border-l-4 border-pink-500 pl-4 mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Amenities Impact</h2>
+            <p class="text-gray-600 text-sm">How bathrooms and balconies affect property value</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Bathroom Distribution</h3>
+                <img src="data:image/png;base64,{{ plots.bathrooms }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Price by Bathrooms</h3>
+                <img src="data:image/png;base64,{{ plots.bath_price }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Balcony Distribution</h3>
+                <img src="data:image/png;base64,{{ plots.balconies }}" class="w-full">
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-3">Price by Balconies</h3>
+                <img src="data:image/png;base64,{{ plots.balcony_price }}" class="w-full">
+            </div>
+        </div>
+    </div>
+    
 </div>
-
-{{ table_data.month|json_script:"month-data" }}
-{{ table_data.3months|json_script:"3months-data" }}
-{{ table_data.6months|json_script:"6months-data" }}
-
-<script>
-    const data = {
-        'month': JSON.parse(document.getElementById('month-data').textContent),
-        '3months': JSON.parse(document.getElementById('3months-data').textContent),
-        '6months': JSON.parse(document.getElementById('6months-data').textContent),
-    };
-
-    function updateTable(period, btn) {
-        const tableBody = document.getElementById('table-body');
-        tableBody.innerHTML = '';
-
-        data[period].forEach(row => {
-            const date = new Date(row.date);
-            const formattedDate = date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="py-2 px-4">${formattedDate}</td>
-                <td class="py-2 px-4">${row.total}</td>
-                <td class="py-2 px-4">${row.processed}</td>
-            `;
-            tableBody.appendChild(tr);
-        });
-
-        document.querySelectorAll('.filter-btn').forEach(button => {
-            button.classList.remove('bg-blue-500', 'text-white');
-            button.classList.add('bg-gray-200', 'text-gray-700');
-        });
-
-        btn.classList.add('bg-blue-500', 'text-white');
-        btn.classList.remove('bg-gray-200', 'text-gray-700');
-    }
-
-    updateTable('month', document.querySelector('.filter-btn.active'));
-</script>
 {% endblock %}

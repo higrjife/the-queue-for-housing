@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container mx-auto p-4 mt-12">
+    
+    <h1 class="text-3xl font-bold mb-6">DataFrame Information</h1>
+    
+    <!-- Basic Info -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <h2 class="text-xl font-bold mb-4">Basic Info</h2>
+        <div class="space-y-2">
+            <p><span class="font-semibold">Shape:</span> {{ info.shape.0 }} rows × {{ info.shape.1 }} columns</p>
+            <p><span class="font-semibold">Memory Usage:</span> {{ info.memory }}</p>
+            <p><span class="font-semibold">Columns:</span> {{ info.columns|join:", " }}</p>
+        </div>
+    </div>
+    
+    <!-- Data Types -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <h2 class="text-xl font-bold mb-4">Data Types</h2>
+        <div class="grid grid-cols-2 gap-4">
+            {% for col, dtype in info.dtypes.items %}
+            <div class="flex justify-between">
+                <span class="text-gray-700">{{ col }}</span>
+                <span class="text-gray-500">{{ dtype }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Describe (Numeric Stats) -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <h2 class="text-xl font-bold mb-4">Numeric Statistics (describe)</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 text-left">Stat</th>
+                        {% for col in describe.keys %}
+                        <th class="px-4 py-2 text-left">{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="px-4 py-2 font-semibold">count</td>
+                        {% for col, stats in describe.items %}
+                        <td class="px-4 py-2">{{ stats.count|floatformat:0 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="px-4 py-2 font-semibold">mean</td>
+                        {% for col, stats in describe.items %}
+                        <td class="px-4 py-2">{{ stats.mean|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 font-semibold">std</td>
+                        {% for col, stats in describe.items %}
+                        <td class="px-4 py-2">{{ stats.std|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="px-4 py-2 font-semibold">min</td>
+                        {% for col, stats in describe.items %}
+                        <td class="px-4 py-2">{{ stats.min|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 font-semibold">25%</td>
+                        {% for col, stats in describe.items %}
+                        <td class="px-4 py-2">{{ stats.q25|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="px-4 py-2 font-semibold">50%</td>
+                        {% for col, stats in describe.items %}
+                        <td class="px-4 py-2">{{ stats.q50|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 font-semibold">75%</td>
+                        {% for col, stats in describe.items %}
+                        <td class="px-4 py-2">{{ stats.q75|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="px-4 py-2 font-semibold">max</td>
+                        {% for col, stats in describe.items %}
+                        <td class="px-4 py-2">{{ stats.max|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Missing Values -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <h2 class="text-xl font-bold mb-4">Missing Values</h2>
+        <div class="grid grid-cols-2 gap-4">
+            {% for col, count in missing.items %}
+            <div class="flex justify-between">
+                <span class="text-gray-700">{{ col }}</span>
+                <span class="{% if count > 0 %}text-red-600 font-semibold{% else %}text-green-600{% endif %}">
+                    {{ count }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Value Counts -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <h2 class="text-xl font-bold mb-4">Value Counts</h2>
+        
+        <div class="mb-4">
+            <h3 class="font-semibold mb-2">Top 5 Locations:</h3>
+            {% for loc, count in value_counts.location.items %}
+            <p class="text-sm">{{ loc }}: {{ count }}</p>
+            {% endfor %}
+        </div>
+        
+        <div class="mb-4">
+            <h3 class="font-semibold mb-2">Size:</h3>
+            {% for size, count in value_counts.size.items %}
+            <p class="text-sm">{{ size }}: {{ count }}</p>
+            {% endfor %}
+        </div>
+        
+        <div>
+            <h3 class="font-semibold mb-2">Area Type:</h3>
+            {% for area, count in value_counts.area_type.items %}
+            <p class="text-sm">{{ area }}: {{ count }}</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

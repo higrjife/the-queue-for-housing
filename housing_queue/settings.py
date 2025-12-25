@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'applications',
     'housing_units',
     'notifications',
+    'app_statistics',
 ]
 
 MIDDLEWARE = [
