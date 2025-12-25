@@ -12,8 +12,6 @@ from notifications.models import Notification
 from .forms import ApplicantDataForm, FamilyDataForm, ApplicationSubmissionForm, QueueCheckForm, QueueSearchForm,save_application_with_documents
 from django.db.models import Window, F
 from django.db.models.functions import RowNumber
-from django.db.models import Count
-from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Q
 
@@ -21,56 +19,6 @@ from django.db.models import Q
 def home(request):
     return render(request, 'info.html')
 
-def statistics(request):
-    today = timezone.now()
-    
-    total_applications = Application.objects.count()
-    total_queue_members = Application.objects.filter(status='IN_QUEUE').count()
-    total_users = User.objects.count()
-    
-    last_month = today - timedelta(days=30)
-    last_month_applications = Application.objects.filter(
-        submission_date__gte=last_month
-    ).count()
-    last_month_queue = Application.objects.filter(
-        submission_date__gte=last_month,
-        status='IN_QUEUE'
-    ).count()
-    
-    last_week = today - timedelta(days=7)
-    last_week_users = User.objects.filter(
-        date_joined__gte=last_week
-    ).count()
-    week_growth = (last_week_users / total_users * 100) if total_users > 0 else 0
-    
-    def get_application_data(days):
-        start_date = today - timedelta(days=days)
-        applications = Application.objects.filter(
-            submission_date__gte=start_date
-        ).extra(
-            select={'date': "date(submission_date)"}
-        ).values('date').annotate(
-            total=Count('id'),
-            processed=Count('id', filter=~Q(status__in=['SUBMITTED', 'IN_QUEUE']))
-        ).order_by('date')
-        
-        return list(applications)
-
-    context = {
-        'total_applications': total_applications,
-        'total_queue_members': total_queue_members,
-        'total_users': total_users,
-        'last_month_applications': last_month_applications,
-        'last_month_queue': last_month_queue,
-        'week_growth': week_growth,
-        'table_data': {
-            'month': get_application_data(30),
-            '3months': get_application_data(90),
-            '6months': get_application_data(180),
-        }
-    }
-    
-    return render(request, 'statistics.html', context)
 
 def check_queue_number(request):
     if request.method == 'POST':
@@ -161,7 +109,12 @@ def create_application(request):
                 messages.error(request, f'Error submitting application: {str(e)}')
         else:
             # Forms have errors
-            messages.error(request, 'Please correct the errors in the form.')
+            if not applicant_form.is_valid():
+                messages.error(request, f"Applicant form errors: {applicant_form.errors.as_text()}")
+            if not family_form.is_valid():
+                messages.error(request, f"Family form errors: {family_form.errors.as_text()}")
+            if not submission_form.is_valid():
+                messages.error(request, f"Submission form errors: {submission_form.errors.as_text()}")
     else:
         applicant_form = ApplicantDataForm()
         family_form = FamilyDataForm()
@@ -397,74 +350,3 @@ def reject_application(request, application_id):
     
     
 
-
-
-
-
-
-### API
-
-# api/views.py
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from applications.models import Application
-from users.models import User
-from .forms import QueueCheckForm
-from .serializers import QueueCheckResponseSerializer, QueueSerializer
-from django.contrib import messages
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-
-@method_decorator(csrf_exempt, name='dispatch')
-class QueueCheckAPIView(APIView):
-    @swagger_auto_schema(
-        request_body=QueueSerializer,
-        responses={
-            200: QueueCheckResponseSerializer,
-            400: "Bad Request"
-        },
-        operation_description="Login a user"
-    )
-
-    def post(self, request):
-        # Validate input
-        serializer = QueueSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        iin = serializer.validated_data['iin']
-        
-        try:
-            # Find the user
-            user = User.objects.get(iin=iin)
-            
-            # Get the user's first application in relevant statuses
-            application = Application.objects.filter(
-                applicant=user,
-                status__in=['SUBMITTED', 'UNDER_REVIEW', 'IN_QUEUE']
-            ).order_by('submission_date').first()
-            
-            if not application:
-                return Response({
-                    'message': 'No active applications found for this IIN.'
-                }, status=status.HTTP_404_NOT_FOUND)
-            
-            # Get all applications in queue, ordered by priority and submission date
-            all_queued_applications = Application.objects.filter(
-                status__in=['SUBMITTED', 'UNDER_REVIEW', 'IN_QUEUE']
-            ).order_by('-priority_score', 'submission_date')
-            
-            # Calculate queue position
-            queue_position = list(all_queued_applications).index(application) + 1
-            
-            # Return only the queue position
-            response_data = {'queue_position': queue_position}
-            return Response(response_data, status=status.HTTP_200_OK)
-        
-        except User.DoesNotExist:
-            return Response({
-                'message': 'No user found with this IIN.'
-            }, status=status.HTTP_404_NOT_FOUND)

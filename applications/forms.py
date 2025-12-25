@@ -30,7 +30,6 @@ class ApplicantDataForm(forms.ModelForm):
         ('EMERGENCY_HOUSING', 'Гражданин, проживающий в аварийном жилье'),  # Citizen with emergency housing
     ]
 
-
     category = forms.ChoiceField(
         choices=CATEGORY_CHOICES,
         widget=forms.Select(attrs={'class': 'w-full p-2 border rounded'}),
@@ -104,60 +103,6 @@ class ApplicationSubmissionForm(forms.Form):
         'placeholder': 'Add any additional information here...'
     }))
     confirm_submission = forms.BooleanField(required=True, widget=forms.CheckboxInput(attrs={'class': 'mr-2'}))
-
-
-# def save_application_with_documents(applicant_form, family_form, submission_form, user):
-#     """Helper function to save application with related documents"""
-#     application = applicant_form.save(commit=False)
-#     application.applicant = user
-    
-#     # Update with family form data
-#     for field in family_form.Meta.fields:
-#         if field in family_form.cleaned_data:
-#             setattr(application, field, family_form.cleaned_data[field])
-    
-#     application.save()
-    
-#     # Save documents if provided
-#     documents_to_save = []
-
-#     if family_form.cleaned_data.get('id_proof_document'):
-#         documents_to_save.append({
-#             'document_type': 'ID_PROOF',
-#             'file': family_form.cleaned_data['id_proof_document']
-#         })
-
-#     if family_form.cleaned_data.get('is_single_parent') and family_form.cleaned_data.get('is_single_parent_document'):
-#         documents_to_save.append({
-#             'document_type': 'SINGLE_PARENT_PROOF',
-#             'file': family_form.cleaned_data['is_single_parent_document']
-#         })
-    
-#     if family_form.cleaned_data.get('is_veteran') and family_form.cleaned_data.get('is_veteran_document'):
-#         documents_to_save.append({
-#             'document_type': 'VETERAN_STATUS',
-#             'file': family_form.cleaned_data['is_veteran_document']
-#         })
-    
-#     if family_form.cleaned_data.get('has_disability') and family_form.cleaned_data.get('disability_document'):
-#         documents_to_save.append({
-#             'document_type': 'DISABILITY_CERTIFICATE',
-#             'file': family_form.cleaned_data['disability_document']
-#         })
-    
-#     # Save documents
-#     for doc_data in documents_to_save:
-#         doc = ApplicationDocument(
-#             application=application,
-#             document_type=doc_data['document_type'],
-#             file=doc_data['file']
-#         )
-#         doc.save()
-    
-#     # Calculate priority score
-#     application.calculate_priority()
-    
-#     return application
 
 
 def save_application_with_documents(applicant_form, family_form, submission_form, user, application=None):
@@ -241,6 +186,8 @@ def save_application_with_documents(applicant_form, family_form, submission_form
     # Recalculate priority score
     application.calculate_priority()
     return application
+
+
 
 class QueueCheckForm(forms.Form):
     iin = forms.CharField(

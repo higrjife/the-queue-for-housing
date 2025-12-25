@@ -6,7 +6,6 @@ app_name = 'applications'
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('statistics/', views.statistics, name='statistics'),
     path('check-queue/', views.check_queue_number, name='check-queue'),
     path('list-queue/', views.queue_members, name='queue_members'),
     path('my-application/list/', views.my_applications, name='my-applications-list'),
@@ -18,5 +17,5 @@ urlpatterns = [
     path('application/update-status/<int:application_id>/<str:new_status>', views.update_application_status, name='update-application-status'),
     
     ## api
-    path('api/check-queue/', views.QueueCheckAPIView.as_view(), name='api_check_queue'),    
+    # path('api/check-queue/', views.QueueCheckAPIView.as_view(), name='api_check_queue'),    
 ]
