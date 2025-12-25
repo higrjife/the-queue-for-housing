@@ -3,3 +3,7 @@ psycopg2-binary
 pillow
 djangorestframework
 drf-yasg
+pandas
+numpy
+matplotlib
+seaborn
