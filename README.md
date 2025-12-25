@@ -12,17 +12,40 @@ A housing waiting list system with automatic priority calculation. Automates the
 -  ✅ Automatic notifications about progress in the queue (optional)
 -  ✅ The admin panel for data management,Issuing notifications about the need to update documents
 
-## Technologies used:
-- Django ORM for database management
-- PostgreSQL for storing information
-- Django REST API for interacting with external systems
-- Celery + Redis for background priority processing
-- Django Admin for working with the queue database
+# Python for Data Analysis
+
+This small Django app collects and exposes simple statistics about the housing queue project. It is intended to provide quick, high-level numbers and basic charts (e.g., total applications, open housing units, recent queue activity) so instructors and reviewers can understand system behavior without digging into raw data.
+
+Why it exists
+------------
+
+- Give a concise snapshot of the system's state for demonstrations and grading.
+- Provide a few lightweight endpoints/views that the frontend or tests can query for aggregated values.
+
+Where to look (quick)
+---------------------
+
+- Views: `app_statistics/views.py` — endpoints that return numbers or simple JSON for charts. This is the main file which uses pandas, matplotlib, numpy to compute statistics.
+- URLs: `app_statistics/urls.py` — the routes you can visit during demos or tests.
+- Data: `house_data.csv` — sample dataset used for testing and demos.
+
+How a teacher should use it
+--------------------------
+
+- Open the statistics page in the running site to see the dashboard summary.
+- Read the `app_statistics/views.py` file to understand what data is being aggregated.
+
+Notes
+-----
+
+- This app is intentionally small and read-only: heavy aggregation should be done offline or in management commands.
+- For details about specific endpoints, inspect `views.py` and `urls.py`.
+
 ## Installation
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/KikuchiE/the-queue-for-housing.git
+    git clone https://github.com/higrjife/the-queue-for-housing.git
     ```
 2. Navigate to the project directory:
     ```bash
