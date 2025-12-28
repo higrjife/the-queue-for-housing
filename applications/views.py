@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .forms import ApplicantDataForm, FamilyDataForm
-from django.shortcuts import render
 from .models import Application, ApplicationHistory
 from housing_units.models import HousingUnit, HousingAllocation
 from django.contrib.auth.decorators import login_required
